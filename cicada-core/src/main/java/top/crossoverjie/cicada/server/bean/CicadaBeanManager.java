@@ -44,15 +44,21 @@ public final class CicadaBeanManager {
      * @throws Exception
      */
     public void initBean(String packageName) throws Exception {
+        // 1. 扫描指定包下的所有带有@CicadaBean注解的类
         Map<String, Class<?>> cicadaBean = ClassScanner.getCicadaBean(packageName);
 
+        // 2. 获取Bean工厂实现（通过SPI机制）
         cicadaBeanFactory = ClassScanner.getCicadaBeanFactory() ;
 
+        // 3. 将扫描到的类实例化，并注册到Bean工厂中
         for (Map.Entry<String, Class<?>> classEntry : cicadaBean.entrySet()) {
+            // 3.1 实例化类
             Object instance = classEntry.getValue().newInstance();
+            // 3.2 将实例化后的类注册到Bean工厂中
             cicadaBeanFactory.register(instance) ;
 
-            //set exception handle
+            // 3.3 如果类实现了GlobalHandelException接口，则设置异常处理
+            // 特殊处理：注册全局异常处理器
             if (ClassScanner.isInterface(classEntry.getValue(), GlobalHandelException.class)){
                 GlobalHandelException exception = (GlobalHandelException) instance;
                 CicadaBeanManager.getInstance().exceptionHandle(exception);

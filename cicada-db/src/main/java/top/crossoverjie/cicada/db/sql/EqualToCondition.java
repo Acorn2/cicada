@@ -9,27 +9,21 @@ package top.crossoverjie.cicada.db.sql;
  */
 public class EqualToCondition extends Condition {
 
-    private Filter filter = null ;
+    private Filter filter = null;
     private int type = 1;
 
     public EqualToCondition(String property, Object value) {
         super(property, value);
-        filter = new Filter(property,value) ;
-    }
-
-    @Override
-    public Condition process(String property, Object value) {
-        filter = new Filter(property,value) ;
-        return this ;
+        filter = new Filter(property, Filter.Operator.EQUAL, value);
     }
 
     @Override
     public Filter getCondition() {
-        return filter ;
+        return filter;
     }
 
     @Override
     public int type() {
-        return type ;
+        return type;
     }
 }

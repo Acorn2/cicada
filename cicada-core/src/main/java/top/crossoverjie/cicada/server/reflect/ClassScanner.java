@@ -215,6 +215,11 @@ public final class ClassScanner {
         return classes;
     }
 
+    /**
+     * 扫描类，支持从文件系统加载类，也支持从jar包加载类
+     * @param packageName
+     * @param set
+     */
     private static void baseScanner(String packageName,Set set) {
         boolean recursive = true;
 
@@ -301,11 +306,14 @@ public final class ClassScanner {
      * @return
      */
     public static CicadaBeanFactory getCicadaBeanFactory() {
+        // META-INF/services/top.crossoverjie.cicada.base.bean.CicadaBeanFactory文件中配置的实现类
+        // 根据配置可知，优先返回自定义实现类
         ServiceLoader<CicadaBeanFactory> cicadaBeanFactories = ServiceLoader.load(CicadaBeanFactory.class);
         if (cicadaBeanFactories.iterator().hasNext()){
             return cicadaBeanFactories.iterator().next() ;
         }
 
+        // 如果没有找到自定义实现，使用`CicadaDefaultBean`
         return new CicadaDefaultBean();
     }
 

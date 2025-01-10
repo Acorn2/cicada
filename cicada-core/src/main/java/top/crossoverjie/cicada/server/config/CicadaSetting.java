@@ -52,7 +52,9 @@ public final class CicadaSetting {
 
 
     public static void initHandle() throws Exception{
+        // 1. 扫描指定包下的所有带有@InitializeHandle注解的类
         List<Class<?>> configuration = ClassScanner.getInitHandles(AppConfig.getInstance().getRootPackageName());
+        // 2. 将扫描到的类实例化，并执行handle方法
         for (Class<?> clazz : configuration) {
             InitializeHandle handle = (InitializeHandle) clazz.newInstance();
             handle.handle();
@@ -99,7 +101,9 @@ public final class CicadaSetting {
     private static void initConfiguration(Class<?> clazz) throws Exception {
         ThreadLocalHolder.setLocalTime(System.currentTimeMillis());
         AppConfig.getInstance().setRootPackageName(clazz);
+        System.out.println("AppConfig.getInstance().getRootPackageName() = " + AppConfig.getInstance().getRootPackageName());
 
+        // 扫描配置类
         List<Class<?>> configuration = ClassScanner.getConfiguration(AppConfig.getInstance().getRootPackageName());
         for (Class<?> aClass : configuration) {
             AbstractCicadaConfiguration conf = (AbstractCicadaConfiguration) aClass.newInstance();
@@ -107,9 +111,14 @@ public final class CicadaSetting {
             // First read
             InputStream stream ;
             String systemProperty = System.getProperty(conf.getPropertiesName());
+            System.out.println("systemProperty = " + systemProperty);
+            // 优先从系统属性中读取配置文件
+            // java -Dapplication.properties=/etc/myapp/application.properties -jar myapp.jar
             if (systemProperty != null) {
                 stream = new FileInputStream(new File(systemProperty));
             } else {
+                // 如果系统属性中没有配置文件，则从classpath中读取
+                System.out.println("conf.getPropertiesName() = " + conf.getPropertiesName());
                 stream = CicadaServer.class.getClassLoader().getResourceAsStream(conf.getPropertiesName());
             }
 

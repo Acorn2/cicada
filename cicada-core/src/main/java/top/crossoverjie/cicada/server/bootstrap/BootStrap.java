@@ -86,24 +86,31 @@ public class BootStrap {
      * shutdown server
      */
     private static void shutDownServer() {
+        // 1. 创建关闭线程
         ShutDownThread shutDownThread = new ShutDownThread();
         shutDownThread.setName(APPLICATION_THREAD_SHUTDOWN_NAME);
+        
+        // 2. 注册JVM关闭钩子
         Runtime.getRuntime().addShutdownHook(shutDownThread);
     }
 
+    // 关闭线程的具体实现
     private static class ShutDownThread extends Thread {
         @Override
         public void run() {
             LOGGER.info("Cicada server stop...");
+            
+            // 3. 清理上下文
             CicadaContext.removeContext();
-
+            
+            // 4. 释放Bean资源
             CicadaBeanManager.getInstance().releaseBean();
-
+            
+            // 5. 关闭Netty线程组
             boss.shutdownGracefully();
             work.shutdownGracefully();
-
+            
             LOGGER.info("Cicada server has been successfully stopped.");
         }
-
     }
 }

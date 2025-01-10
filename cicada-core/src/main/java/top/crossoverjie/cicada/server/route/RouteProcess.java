@@ -38,21 +38,27 @@ public final class RouteProcess {
 
     /**
      * invoke route method
-     * @param method
-     * @param queryStringDecoder
-     * @throws Exception
+     * @param method 要调用的方法
+     * @param queryStringDecoder 请求解码器
+     * @return 方法调用的返回值
+     * @throws Exception 调用过程中的异常
      */
-    public void invoke(Method method, QueryStringDecoder queryStringDecoder) throws Exception {
-        if (method == null){
-            return;
+    public Object invoke(Method method, QueryStringDecoder queryStringDecoder) throws Exception {
+        if (method == null) {
+            return null;
         }
 
-        Object[] object = parseRouteParameter(method, queryStringDecoder);
+        // 解析路由参数
+        Object[] parameters = parseRouteParameter(method, queryStringDecoder);
+        
+        // 获取方法所属的类实例
         Object bean = cicadaBeanManager.getBean(method.getDeclaringClass().getName());
-        if (object == null){
-            method.invoke(bean) ;
-        }else {
-            method.invoke(bean, object);
+        
+        // 调用方法并返回结果
+        if (parameters == null) {
+            return method.invoke(bean);
+        } else {
+            return method.invoke(bean, parameters);
         }
     }
 

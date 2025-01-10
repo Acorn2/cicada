@@ -2,6 +2,9 @@ package top.crossoverjie.cicada.base.bean;
 
 /**
  * Function:
+ * 定义Bean工厂接口
+ * 通过SPI机制支持插件式扩展
+ * 用户可以自定义Bean管理逻辑
  *
  * @author crossoverJie
  *         Date: 2018/11/14 01:06

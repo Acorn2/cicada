@@ -17,6 +17,7 @@ import top.crossoverjie.cicada.server.handle.HttpDispatcher;
  * @since JDK 1.8
  */
 public class CicadaInitializer extends ChannelInitializer<Channel> {
+    // 使用final修饰，只创建一次HttpDispatcher实例
     private final HttpDispatcher httpDispatcher = new HttpDispatcher() ;
 
     @Override

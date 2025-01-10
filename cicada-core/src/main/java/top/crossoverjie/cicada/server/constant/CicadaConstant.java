@@ -38,6 +38,7 @@ public final class CicadaConstant {
         public final static String APPLICATION_THREAD_MAIN_NAME = "☝( ◠‿◠ )☝";
         public final static String APPLICATION_THREAD_WORK_NAME = "(♛‿♛)";
         public final static String APPLICATION_THREAD_SHUTDOWN_NAME = "(〒︿〒)";
+
     }
 
 
