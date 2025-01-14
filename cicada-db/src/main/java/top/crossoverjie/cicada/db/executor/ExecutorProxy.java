@@ -1,7 +1,7 @@
-package top.crossoverjie.cicada.db.core.handle;
+package top.crossoverjie.cicada.db.executor;
 
 import lombok.extern.slf4j.Slf4j;
-import top.crossoverjie.cicada.db.listener.DataChangeListener;
+import top.crossoverjie.cicada.db.listener.DataChangeEvent;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -18,7 +18,7 @@ import java.lang.reflect.Proxy;
  * @since JDK 1.8
  */
 @Slf4j
-public class HandleProxy<T> {
+public class ExecutorProxy<T> {
 
     /** 被代理的接口类型 */
     private Class<T> clazz;
@@ -27,24 +27,24 @@ public class HandleProxy<T> {
      * 构造函数
      * @param clazz 需要代理的接口类
      */
-    public HandleProxy(Class<T> clazz) {
+    public ExecutorProxy(Class<T> clazz) {
         this.clazz = clazz;
     }
 
     /** 数据变更监听器 */
-    private DataChangeListener listener;
+    private DataChangeEvent listener;
 
     /**
      * 获取代理实例（带监听器）
      * @param listener 数据变更监听器
      * @return 代理对象实例
      */
-    public T getInstance(DataChangeListener listener) {
+    public T getInstance(DataChangeEvent listener) {
         this.listener = listener;
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(), 
             new Class[] {clazz}, 
-            new ProxyInvocation(DBHandler.class)
+            new ProxyInvocation(ExecutorProxy.class)
         );
     }
 
@@ -56,7 +56,7 @@ public class HandleProxy<T> {
         return (T) Proxy.newProxyInstance(
             Thread.currentThread().getContextClassLoader(), 
             new Class[] {clazz}, 
-            new ProxyInvocation(DBHandler.class)
+            new ProxyInvocation(ExecutorProxy.class)
         );
     }
 

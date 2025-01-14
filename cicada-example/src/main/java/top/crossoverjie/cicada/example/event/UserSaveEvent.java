@@ -1,7 +1,7 @@
-package top.crossoverjie.cicada.example.listener;
+package top.crossoverjie.cicada.example.event;
 
 import lombok.extern.slf4j.Slf4j;
-import top.crossoverjie.cicada.db.listener.DataChangeListener;
+import top.crossoverjie.cicada.db.listener.DataChangeEvent;
 
 /**
  * Function:
@@ -11,7 +11,7 @@ import top.crossoverjie.cicada.db.listener.DataChangeListener;
  * @since JDK 1.8
  */
 @Slf4j
-public class UserSaveListener implements DataChangeListener {
+public class UserSaveEvent implements DataChangeEvent {
     @Override
     public void listener(Object obj) {
         log.info("user save data={}", obj.toString());

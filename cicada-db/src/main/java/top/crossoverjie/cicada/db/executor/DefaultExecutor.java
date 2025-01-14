@@ -1,6 +1,7 @@
-package top.crossoverjie.cicada.db.core.handle;
+package top.crossoverjie.cicada.db.executor;
 
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
+import com.healthmarketscience.sqlbuilder.DeleteQuery;
 import com.healthmarketscience.sqlbuilder.InsertQuery;
 import com.healthmarketscience.sqlbuilder.UpdateQuery;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
@@ -8,7 +9,7 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import lombok.extern.slf4j.Slf4j;
 import top.crossoverjie.cicada.db.annotation.OriginName;
 import top.crossoverjie.cicada.db.annotation.PrimaryId;
-import top.crossoverjie.cicada.db.core.SqlSessionFactory;
+import top.crossoverjie.cicada.db.session.SqlSessionFactory;
 import top.crossoverjie.cicada.db.model.Model;
 import top.crossoverjie.cicada.db.reflect.Instance;
 import top.crossoverjie.cicada.db.reflect.ReflectTools;
@@ -24,13 +25,15 @@ import java.util.Map;
 
 /**
  * Function:
+ *- 实现具体的CRUD操作
+ * - 处理SQL构建和执行
  *
  * @author crossoverJie
  * Date: 2019-12-03 23:53
  * @since JDK 1.8
  */
 @Slf4j
-public class DBHandler extends SqlSessionFactory implements DBHandle {
+public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
 
     private DbTable dbTable;
 
@@ -127,5 +130,54 @@ public class DBHandler extends SqlSessionFactory implements DBHandle {
             }
         }
 
+    }
+
+    @Override
+    public int delete(Object obj) {
+        if (!(obj instanceof Model)) {
+            return 0;
+        }
+
+        try {
+            // 获取表名
+            dbTable = super.origin().addTable(obj.getClass().getAnnotation(OriginName.class).value());
+            DeleteQuery deleteQuery = new DeleteQuery(dbTable);
+
+            // 查找主键字段
+            Field primaryKeyField = null;
+            Object primaryKeyValue = null;
+            
+            for (Field field : obj.getClass().getDeclaredFields()) {
+                if (field.getAnnotation(PrimaryId.class) != null) {
+                    primaryKeyField = field;
+                    primaryKeyValue = Instance.getFiledValue(obj, field);
+                    break;
+                }
+            }
+
+            if (primaryKeyField == null || primaryKeyValue == null) {
+                log.error("No primary key found or primary key value is null");
+                return 0;
+            }
+
+            // 添加主键条件
+            String dbField = ReflectTools.getDbField(primaryKeyField);
+            DbColumn primaryKeyColumn = dbTable.addColumn(dbField);
+            deleteQuery.addCondition(BinaryCondition.equalTo(primaryKeyColumn, primaryKeyValue));
+
+            // 执行删除操作
+            try (Statement statement = super.origin().getConnection().createStatement()) {
+                String sql = deleteQuery.validate().toString();
+                log.debug("execute sql>>>>>{}", sql);
+                return statement.executeUpdate(sql);
+            }
+
+        } catch (SQLException e) {
+            log.error("Delete operation failed", e);
+            throw new RuntimeException("Delete operation failed", e);
+        } catch (Exception e) {
+            log.error("Unexpected error during delete operation", e);
+            throw new RuntimeException("Unexpected error during delete operation", e);
+        }
     }
 }

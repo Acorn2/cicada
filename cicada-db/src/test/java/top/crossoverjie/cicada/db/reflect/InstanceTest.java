@@ -14,7 +14,7 @@ public class InstanceTest {
 
     @Test
     public void transfer() {
-        User user = Instance.transfer(User.class, "id", 123);
+        User user = EntityMapper.transfer(User.class, "id", 123);
         log.info("user={}", user.toString());
     }
 
@@ -23,7 +23,7 @@ public class InstanceTest {
         Map<String,Object> fields = new HashMap<>() ;
         fields.put("id" ,100) ;
         fields.put("name", "张三") ;
-        User user = Instance.transfer(User.class, fields);
+        User user = EntityMapper.transfer(User.class, fields);
         log.info("user={}", user.toString());
     }
 
@@ -46,7 +46,7 @@ public class InstanceTest {
         User user = new User() ;
         user.setId(1);
         user.setName("abc");
-        Object name = Instance.getFiledValue(user, user.getClass().getDeclaredField("name"));
+        Object name = EntityMapper.getFiledValue(user, user.getClass().getDeclaredField("name"));
         System.out.println(name);
     }
 }

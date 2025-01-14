@@ -1,7 +1,8 @@
 package top.crossoverjie.cicada.example.init;
 
 import lombok.extern.slf4j.Slf4j;
-import top.crossoverjie.cicada.db.core.SqlSession;
+import top.crossoverjie.cicada.db.pool.config.PoolConfigFactory;
+import top.crossoverjie.cicada.db.session.SqlSession;
 import top.crossoverjie.cicada.server.bootstrap.InitializeHandle;
 import top.crossoverjie.cicada.server.configuration.ApplicationConfiguration;
 import top.crossoverjie.cicada.server.configuration.ConfigurationHolder;
@@ -22,7 +23,7 @@ public class DBInit extends InitializeHandle {
         String username = configuration.get("db.username");
         String pwd = configuration.get("db.pwd");
         String url = configuration.get("db.url");
-        SqlSession.init(username, pwd, url);
+        SqlSession.init(username, pwd, url,PoolConfigFactory.getPoolConfig());
         log.info("db init success!!");
     }
 }

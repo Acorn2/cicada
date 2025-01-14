@@ -2,6 +2,7 @@ package top.crossoverjie.cicada.db.sql;
 
 /**
  * Function:
+ * 相等条件实现
  *
  * @author crossoverJie
  * Date: 2019-11-28 01:29

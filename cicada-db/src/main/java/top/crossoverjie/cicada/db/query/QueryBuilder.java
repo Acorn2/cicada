@@ -1,4 +1,4 @@
-package top.crossoverjie.cicada.db.core;
+package top.crossoverjie.cicada.db.query;
 
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.InCondition;
@@ -11,6 +11,7 @@ import top.crossoverjie.cicada.db.annotation.OriginName;
 import top.crossoverjie.cicada.db.model.Model;
 import top.crossoverjie.cicada.db.reflect.Instance;
 import top.crossoverjie.cicada.db.reflect.ReflectTools;
+import top.crossoverjie.cicada.db.session.SqlSessionFactory;
 import top.crossoverjie.cicada.db.sql.Condition;
 
 import java.lang.reflect.Field;
@@ -22,13 +23,16 @@ import java.sql.Statement;
 import java.util.*;
 
 /**
+ * - 支持链式调用
+ * - 实现条件查询、分页、排序等功能
+ * - 处理结果集映射
  * @author hresh
  * @博客 https://juejin.cn/user/2664871918047063
  * @网站 https://www.hreshhao.com/
  * @date 2025/1/2 11:00
  */
 @Slf4j
-public class DBQueryV2<T extends Model> extends SqlSessionFactory {
+public class QueryBuilder<T extends Model> extends SqlSessionFactory {
 
     private final Class<T> targetClass;  // 改为 final
 
@@ -61,7 +65,7 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
     /**
      * 优化1: 添加构造函数，强制初始化必要参数
      */
-    public DBQueryV2(Class<T> targetClass) {
+    public QueryBuilder(Class<T> targetClass) {
         if (targetClass == null) {
             throw new IllegalArgumentException("Target class cannot be null");
         }
@@ -74,7 +78,7 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
     /**
      * 优化2: 添加分页支持
      */
-    public DBQueryV2<T> page(int pageNum, int pageSize) {
+    public QueryBuilder<T> page(int pageNum, int pageSize) {
         if (pageNum <= 0 || pageSize <= 0) {
             throw new IllegalArgumentException("Page parameters must be positive");
         }
@@ -86,7 +90,7 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
     /**
      * 优化3: 添加排序支持
      */
-    public DBQueryV2<T> orderBy(String field, boolean ascending) {
+    public QueryBuilder<T> orderBy(String field, boolean ascending) {
         DbColumn column = columnMap.get(field);
         if (column != null) {
             orderByList.add(ascending ? new OrderObject(OrderObject.Dir.ASCENDING, column) : new OrderObject(OrderObject.Dir.DESCENDING, column));
@@ -159,13 +163,16 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
             }
         }
 
-        // 添加分页
+        // 构建基础 SQL
+        String sql = selectQuery.validate().toString();
+
+        // MySQL 风格的分页
         if (pageSize != null && pageNum != null) {
             int offset = (pageNum - 1) * pageSize;
-            selectQuery.setOffset(offset).setFetchNext(pageSize);
+            sql += String.format(" LIMIT %d OFFSET %d", pageSize, offset);
         }
 
-        return selectQuery.validate().toString();
+        return sql;
     }
 
     /**
@@ -198,7 +205,7 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
         List<T> results = new ArrayList<>();
         for (Condition condition : batchConditions) {
             results.addAll(
-                    new DBQueryV2<>(targetClass)
+                    new QueryBuilder<>(targetClass)
                             .addCondition(condition)
                             .all()
             );
@@ -278,7 +285,7 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
      * @param condition 查询条件
      * @return 当前查询对象
      */
-    public DBQueryV2<T> addCondition(Condition condition) {
+    public QueryBuilder<T> addCondition(Condition condition) {
         if (condition != null) {
             conditions.add(condition);
         }
@@ -348,15 +355,15 @@ public class DBQueryV2<T extends Model> extends SqlSessionFactory {
     /**
      * 优化7: 添加条件构建器方法
      */
-    public DBQueryV2<T> where(String field, Object value) {
+    public QueryBuilder<T> where(String field, Object value) {
         return addCondition(new Condition(field, Condition.Filter.Operator.EQUAL, value));
     }
 
-    public DBQueryV2<T> whereLike(String field, String value) {
+    public QueryBuilder<T> whereLike(String field, String value) {
         return addCondition(new Condition(field, Condition.Filter.Operator.LIKE, value));
     }
 
-    public DBQueryV2<T> whereIn(String field, Collection<?> values) {
+    public QueryBuilder<T> whereIn(String field, Collection<?> values) {
         return addCondition(new Condition(field, Condition.Filter.Operator.IN, values));
     }
 

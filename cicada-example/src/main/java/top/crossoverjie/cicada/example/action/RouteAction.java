@@ -1,13 +1,13 @@
 package top.crossoverjie.cicada.example.action;
 
 import lombok.extern.slf4j.Slf4j;
-import top.crossoverjie.cicada.db.core.DBQuery;
-import top.crossoverjie.cicada.db.core.handle.DBHandle;
-import top.crossoverjie.cicada.db.core.handle.HandleProxy;
+import top.crossoverjie.cicada.db.executor.ExecutorProxy;
+import top.crossoverjie.cicada.db.executor.SqlExecutor;
+import top.crossoverjie.cicada.db.query.QueryBuilder;
 import top.crossoverjie.cicada.db.sql.EqualToCondition;
 import top.crossoverjie.cicada.example.exception.ExceptionHandle;
-import top.crossoverjie.cicada.example.listener.UserSaveListener;
-import top.crossoverjie.cicada.example.listener.UserUpdateListener;
+import top.crossoverjie.cicada.example.event.UserSaveEvent;
+import top.crossoverjie.cicada.example.event.UserUpdateEvent;
 import top.crossoverjie.cicada.example.model.User;
 import top.crossoverjie.cicada.example.req.DemoReq;
 import top.crossoverjie.cicada.server.action.req.Cookie;
@@ -36,7 +36,7 @@ public class RouteAction {
         log.info(req.toString());
         WorkRes<List> reqWorkRes = new WorkRes<>();
 
-        List<User> all = new DBQuery<User>().query(User.class)
+        List<User> all = new QueryBuilder<>(User.class)
                 .addCondition(new EqualToCondition("password", "abc123"))
                 .addCondition(new EqualToCondition("id", req.getId())).all();
 
@@ -49,7 +49,7 @@ public class RouteAction {
         log.info(req.toString());
         WorkRes<List> reqWorkRes = new WorkRes<>();
 
-        List<User> all = new DBQuery<User>().query(User.class)
+        List<User> all = new QueryBuilder<>(User.class)
                 .addCondition(new EqualToCondition("password", "abc123"))
                 .addCondition(new EqualToCondition("id", req.getId())).all();
 
@@ -60,7 +60,7 @@ public class RouteAction {
 
     @CicadaRoute("saveUser")
     public void saveUser(DemoReq req) {
-        DBHandle handle = (DBHandle) new HandleProxy(DBHandle.class).getInstance(new UserSaveListener());
+        SqlExecutor handle = (SqlExecutor) new ExecutorProxy<>(SqlExecutor.class).getInstance(new UserSaveEvent());
         User user = new User();
         user.setName(req.getName());
         handle.insert(user);
@@ -72,7 +72,7 @@ public class RouteAction {
 
     @CicadaRoute("updateUser")
     public void updateUser(DemoReq req) {
-        DBHandle handle = (DBHandle) new HandleProxy(DBHandle.class).getInstance(new UserUpdateListener());
+        SqlExecutor handle = (SqlExecutor) new ExecutorProxy<>(SqlExecutor.class).getInstance(new UserUpdateEvent());
         User user = new User();
         user.setId(req.getId());
         user.setName(req.getName());

@@ -13,7 +13,7 @@ import java.util.Map;
  * Date: 2019-11-22 00:54
  * @since JDK 1.8
  */
-public class ReflectTools {
+public class ReflectionUtils {
 
     private static final Map<String, String> TYPE_MAPPING = new HashMap<>(8);
 

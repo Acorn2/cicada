@@ -1,12 +1,12 @@
 package top.crossoverjie.cicada.db.sql;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
  * Function:
- *
+ - 封装SQL查询条件
+ - 支持多种操作符(=, !=, >, <, LIKE, IN等)
  * @author crossoverJie
  * Date: 2019-11-28 00:49
  * @since JDK 1.8

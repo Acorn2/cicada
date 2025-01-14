@@ -14,7 +14,7 @@ import java.util.Map;
  * 2. 处理对象的属性设置和获取
  */
 @Slf4j
-public class Instance {
+public class EntityMapper {
 
     /**
      * 将单个字段值转换为目标类型的实例

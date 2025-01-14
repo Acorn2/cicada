@@ -3,7 +3,6 @@ package top.crossoverjie.cicada.example.action;
 import org.junit.Test;
 import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
-import top.crossoverjie.cicada.server.action.WorkAction;
 import top.crossoverjie.cicada.server.annotation.CicadaRoute;
 
 import java.lang.reflect.Method;
