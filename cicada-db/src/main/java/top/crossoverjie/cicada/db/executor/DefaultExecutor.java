@@ -9,10 +9,10 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import lombok.extern.slf4j.Slf4j;
 import top.crossoverjie.cicada.db.annotation.OriginName;
 import top.crossoverjie.cicada.db.annotation.PrimaryId;
+import top.crossoverjie.cicada.db.reflect.EntityMapper;
+import top.crossoverjie.cicada.db.reflect.ReflectionUtils;
 import top.crossoverjie.cicada.db.session.SqlSessionFactory;
 import top.crossoverjie.cicada.db.model.Model;
-import top.crossoverjie.cicada.db.reflect.Instance;
-import top.crossoverjie.cicada.db.reflect.ReflectTools;
 
 import java.lang.reflect.Field;
 import java.sql.PreparedStatement;
@@ -47,9 +47,9 @@ public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
             Map<DbColumn, Integer> primaryCondition = new HashMap<>(1);
             UpdateQuery updateQuery = new UpdateQuery(dbTable);
             for (Field field : obj.getClass().getDeclaredFields()) {
-                String dbField = ReflectTools.getDbField(field);
+                String dbField = ReflectionUtils.getDbField(field);
 
-                Object filedValue = Instance.getFiledValue(obj, field);
+                Object filedValue = EntityMapper.getFiledValue(obj, field);
                 if (null == filedValue) {
                     continue;
                 }
@@ -93,8 +93,8 @@ public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
         List<Field> values = new ArrayList<>();
 
         for (Field field : obj.getClass().getDeclaredFields()) {
-            String dbField = ReflectTools.getDbField(field);
-            Object filedValue = Instance.getFiledValue(obj, field);
+            String dbField = ReflectionUtils.getDbField(field);
+            Object filedValue = EntityMapper.getFiledValue(obj, field);
             if (null == filedValue) {
                 continue;
             }
@@ -111,12 +111,12 @@ public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
             for (int i = 0; i < values.size(); i++) {
                 Field value = values.get(i);
                 if (value.getType() == Integer.class) {
-                    statement.setInt(i+1, (Integer) Instance.getFiledValue(obj, value));
+                    statement.setInt(i+1, (Integer) EntityMapper.getFiledValue(obj, value));
                 }
                 if (value.getType() == String.class) {
-                    statement.setString(i+1, (String) Instance.getFiledValue(obj, value));
+                    statement.setString(i+1, (String) EntityMapper.getFiledValue(obj, value));
                 }
-                sb.append(value.getName() + "=" + Instance.getFiledValue(obj, value) + "\t") ;
+                sb.append(value.getName() + "=" + EntityMapper.getFiledValue(obj, value) + "\t") ;
             }
             log.debug("params >>>>>>>>>[{}]", sb.toString());
             statement.execute() ;
@@ -150,7 +150,7 @@ public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
             for (Field field : obj.getClass().getDeclaredFields()) {
                 if (field.getAnnotation(PrimaryId.class) != null) {
                     primaryKeyField = field;
-                    primaryKeyValue = Instance.getFiledValue(obj, field);
+                    primaryKeyValue = EntityMapper.getFiledValue(obj, field);
                     break;
                 }
             }
@@ -161,7 +161,7 @@ public class DefaultExecutor extends SqlSessionFactory implements SqlExecutor {
             }
 
             // 添加主键条件
-            String dbField = ReflectTools.getDbField(primaryKeyField);
+            String dbField = ReflectionUtils.getDbField(primaryKeyField);
             DbColumn primaryKeyColumn = dbTable.addColumn(dbField);
             deleteQuery.addCondition(BinaryCondition.equalTo(primaryKeyColumn, primaryKeyValue));
 

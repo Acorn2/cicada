@@ -1,6 +1,6 @@
 package top.crossoverjie.cicada.server.action.res;
 
-import top.crossoverjie.cicada.server.action.req.Cookie;
+import top.crossoverjie.cicada.server.action.cookie.HttpCookie;
 
 import java.util.List;
 import java.util.Map;
@@ -50,7 +50,7 @@ public interface CicadaResponse {
      * set cookie
      * @param cookie cookie
      */
-    void setCookie(Cookie cookie) ;
+    void setCookie(HttpCookie cookie) ;
 
 
     /**

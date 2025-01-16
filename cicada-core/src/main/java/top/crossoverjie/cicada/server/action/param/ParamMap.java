@@ -1,5 +1,8 @@
 package top.crossoverjie.cicada.server.action.param;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import top.crossoverjie.cicada.server.exception.GenericException;
+
 import java.util.HashMap;
 
 /**
@@ -10,8 +13,18 @@ import java.util.HashMap;
  * @since JDK 1.8
  */
 public class ParamMap extends HashMap<String,Object> implements Param {
-
-
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    
+    @Override
+    public <T> T convertTo(Class<T> clazz) {
+        try {
+            // 先将Map转为JSON字符串，再转为目标对象
+            String json = OBJECT_MAPPER.writeValueAsString(this);
+            return OBJECT_MAPPER.readValue(json, clazz);
+        } catch (Exception e) {
+            throw new GenericException("Failed to convert parameters to " + clazz.getName());
+        }
+    }
 
     @Override
     public String getString(String param) {

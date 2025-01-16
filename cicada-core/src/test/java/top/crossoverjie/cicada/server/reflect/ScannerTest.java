@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import org.junit.Test;
 import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
+import top.crossoverjie.cicada.server.scanner.ClasLoadersScanner;
 
 import java.util.List;
 import java.util.Map;
@@ -16,7 +17,7 @@ public class ScannerTest {
 
     @Test
     public void getClasses() throws Exception {
-        Set<Class<?>> classes = ClassScanner.getClasses("top.crossoverjie.cicada.server");
+        Set<Class<?>> classes = ClasLoadersScanner.getClasses("top.crossoverjie.cicada.server");
 
         LOGGER.info("classes=[{}]", JSON.toJSONString(classes));
     }
@@ -24,14 +25,14 @@ public class ScannerTest {
 
     @Test
     public void getActionAction() throws Exception{
-        Map<String, Class<?>> cicadaAction = ClassScanner.getCicadaBean("top.crossoverjie.cicada.server");
+        Map<String, Class<?>> cicadaAction = ClasLoadersScanner.getCicadaBean("top.crossoverjie.cicada.server");
         LOGGER.info("classes=[{}]", JSON.toJSONString(cicadaAction));
     }
 
 
     @Test
     public void getConfiguration() throws Exception {
-        List<Class<?>> configuration = ClassScanner.getConfiguration("top.crossoverjie.cicada.server");
+        List<Class<?>> configuration = ClasLoadersScanner.getConfiguration("top.crossoverjie.cicada.server");
         LOGGER.info("configuration=[{}]",configuration.toString());
     }
 

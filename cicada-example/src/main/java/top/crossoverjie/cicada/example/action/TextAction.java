@@ -1,7 +1,7 @@
 package top.crossoverjie.cicada.example.action;
 
-import top.crossoverjie.cicada.server.annotation.CicadaAction;
-import top.crossoverjie.cicada.server.annotation.CicadaRoute;
+import top.crossoverjie.cicada.base.annotation.CicadaAction;
+import top.crossoverjie.cicada.base.annotation.CicadaRoute;
 import top.crossoverjie.cicada.server.context.CicadaContext;
 
 /**

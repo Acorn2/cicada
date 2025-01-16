@@ -52,4 +52,11 @@ public interface Param extends Map<String, Object> {
      * @return
      */
     Boolean getBoolean(String param) ;
+
+    /**
+     * 将参数转换为指定类型的对象
+     * @param clazz 目标类型
+     * @return 转换后的对象
+     */
+    <T> T convertTo(Class<T> clazz);
 }

@@ -1,9 +1,9 @@
 package top.crossoverjie.cicada.server.action.res;
 
 import io.netty.handler.codec.http.cookie.DefaultCookie;
-import top.crossoverjie.cicada.server.action.req.Cookie;
+import top.crossoverjie.cicada.server.action.cookie.HttpCookie;
 import top.crossoverjie.cicada.server.constant.CicadaConstant;
-import top.crossoverjie.cicada.server.exception.CicadaException;
+import top.crossoverjie.cicada.server.exception.GenericException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -67,16 +67,16 @@ public class CicadaHttpResponse implements CicadaResponse {
 
 
     @Override
-    public void setCookie(Cookie cicadaCookie) {
+    public void setCookie(HttpCookie cicadaCookie) {
         if (null == cicadaCookie){
-            throw new CicadaException("cookie is null!") ;
+            throw new GenericException("cookie is null!") ;
         }
 
         if (null == cicadaCookie.getName()){
-            throw new CicadaException("cookie.getName() is null!") ;
+            throw new GenericException("cookie.getName() is null!") ;
         }
         if (null == cicadaCookie.getValue()){
-            throw new CicadaException("cookie.getValue() is null!") ;
+            throw new GenericException("cookie.getValue() is null!") ;
         }
 
         DefaultCookie cookie = new DefaultCookie(cicadaCookie.getName(), cicadaCookie.getValue());

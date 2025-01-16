@@ -1,7 +1,8 @@
 package top.crossoverjie.cicada.server;
 
-import top.crossoverjie.cicada.server.bootstrap.BootStrap;
 import top.crossoverjie.cicada.server.config.CicadaSetting;
+import top.crossoverjie.cicada.server.netty.NettyServer;
+import top.crossoverjie.cicada.server.scanner.InitializeHandleScanner;
 
 /**
  * Function:
@@ -20,11 +21,14 @@ public final class CicadaServer {
      * @throws Exception
      */
     public static void start(Class<?> clazz,String path) throws Exception {
-        CicadaSetting.setting(clazz,path) ;
+        // 1. 基础配置
+        CicadaSetting.setting(clazz, path);
 
-        CicadaSetting.initHandle();
+        // 2. 执行初始化处理器
+        InitializeHandleScanner.executeApplicationHandlers();
 
-        BootStrap.startCicada();
+        // 3. 启动服务器
+        NettyServer.startCicada();
     }
 
 

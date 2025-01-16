@@ -2,8 +2,8 @@ package top.crossoverjie.cicada.server.context;
 
 import com.alibaba.fastjson.JSON;
 import top.crossoverjie.cicada.server.action.req.CicadaRequest;
+import top.crossoverjie.cicada.server.action.res.ApiResponse;
 import top.crossoverjie.cicada.server.action.res.CicadaResponse;
-import top.crossoverjie.cicada.server.action.res.WorkRes;
 import top.crossoverjie.cicada.server.constant.CicadaConstant;
 import top.crossoverjie.cicada.server.thread.ThreadLocalHolder;
 
@@ -35,11 +35,11 @@ public final class CicadaContext {
 
     /**
      * response json message
-     * @param workRes
+     * @param ApiResponse
      */
-    public void json(WorkRes workRes){
+    public void json(ApiResponse ApiResponse){
         CicadaContext.getResponse().setContentType(CicadaConstant.ContentType.JSON);
-        CicadaContext.getResponse().setHttpContent(JSON.toJSONString(workRes));
+        CicadaContext.getResponse().setHttpContent(JSON.toJSONString(ApiResponse));
     }
 
     /**

@@ -1,6 +1,6 @@
 package top.crossoverjie.cicada.example.configuration;
 
-import top.crossoverjie.cicada.server.configuration.AbstractCicadaConfiguration;
+import top.crossoverjie.cicada.base.configuration.AbstractCicadaConfiguration;
 
 /**
  * Function:

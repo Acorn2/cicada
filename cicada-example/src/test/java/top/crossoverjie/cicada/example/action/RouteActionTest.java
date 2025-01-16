@@ -3,7 +3,7 @@ package top.crossoverjie.cicada.example.action;
 import org.junit.Test;
 import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
-import top.crossoverjie.cicada.server.annotation.CicadaRoute;
+import top.crossoverjie.cicada.base.annotation.CicadaRoute;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -36,14 +36,6 @@ public class RouteActionTest {
 
         LOGGER.info(routes.toString());
 
-    }
-
-    @Test
-    public void reflect2() throws Exception{
-        Class<?> aClass = Class.forName("top.crossoverjie.cicada.example.action.DemoAction");
-        String name = aClass.getName();
-        Class<?>[] interfaces = aClass.getInterfaces() ;
-        LOGGER.info((interfaces[0].getName() == WorkAction.class.getName()) + "");
     }
 
     @Test

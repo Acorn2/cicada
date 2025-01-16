@@ -9,8 +9,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import lombok.extern.slf4j.Slf4j;
 import top.crossoverjie.cicada.db.annotation.OriginName;
 import top.crossoverjie.cicada.db.model.Model;
-import top.crossoverjie.cicada.db.reflect.Instance;
-import top.crossoverjie.cicada.db.reflect.ReflectTools;
+import top.crossoverjie.cicada.db.reflect.EntityMapper;
+import top.crossoverjie.cicada.db.reflect.ReflectionUtils;
 import top.crossoverjie.cicada.db.session.SqlSessionFactory;
 import top.crossoverjie.cicada.db.sql.Condition;
 
@@ -132,14 +132,14 @@ public class QueryBuilder<T extends Model> extends SqlSessionFactory {
         Map<String, Object> fields = new HashMap<>(8);
 
         for (Field field : targetClass.getDeclaredFields()) {
-            String dbField = ReflectTools.getDbField(field);
+            String dbField = ReflectionUtils.getDbField(field);
             Object value = getValueFromResultSet(rs, field, dbField);
             if (value != null) {
                 fields.put(field.getName(), value);
             }
         }
 
-        return Instance.transfer(targetClass, fields);
+        return EntityMapper.transfer(targetClass, fields);
     }
 
 
@@ -220,7 +220,7 @@ public class QueryBuilder<T extends Model> extends SqlSessionFactory {
      */
     private void addColumns(SelectQuery selectQuery) {
         for (Field field : targetClass.getDeclaredFields()) {
-            String dbField = ReflectTools.getDbField(field);
+            String dbField = ReflectionUtils.getDbField(field);
             DbColumn dbColumn = dbTable.addColumn(dbField);
             selectQuery.addColumns(dbColumn);
             columnMap.put(dbField, dbColumn);
@@ -439,7 +439,7 @@ public class QueryBuilder<T extends Model> extends SqlSessionFactory {
         StringBuilder values = new StringBuilder();
 
         for (Field field : targetClass.getDeclaredFields()) {
-            String dbField = ReflectTools.getDbField(field);
+            String dbField = ReflectionUtils.getDbField(field);
             field.setAccessible(true);
 
             try {

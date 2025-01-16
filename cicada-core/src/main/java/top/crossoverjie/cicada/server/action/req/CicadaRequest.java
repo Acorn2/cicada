@@ -1,5 +1,8 @@
 package top.crossoverjie.cicada.server.action.req;
 
+import top.crossoverjie.cicada.server.action.cookie.HttpCookie;
+import top.crossoverjie.cicada.server.action.param.Param;
+
 /**
  * Function:
  *
@@ -26,7 +29,21 @@ public interface CicadaRequest {
      * @param key
      * @return return cookie by key
      */
-    Cookie getCookie(String key) ;
+    HttpCookie getCookie(String key) ;
 
+    /**
+     * 获取URL查询参数
+     */
+    Param getQueryParameters();
+
+    /**
+     * 获取请求体参数
+     */
+    Param getBodyParameters();
+
+    /**
+     * 获取所有参数（查询参数 + 请求体参数）
+     */
+    Param getAllParameters();
 
 }

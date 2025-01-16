@@ -4,10 +4,10 @@ import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
 import top.crossoverjie.cicada.example.configuration.KafkaConfiguration;
 import top.crossoverjie.cicada.example.configuration.RedisConfiguration;
-import top.crossoverjie.cicada.server.configuration.ApplicationConfiguration;
-import top.crossoverjie.cicada.server.configuration.ConfigurationHolder;
+import top.crossoverjie.cicada.server.config.configuration.ApplicationConfiguration;
+import top.crossoverjie.cicada.server.config.holder.ConfigurationHolder;
 
-import static top.crossoverjie.cicada.server.configuration.ConfigurationHolder.getConfiguration;
+import static top.crossoverjie.cicada.server.config.holder.ConfigurationHolder.getConfiguration;
 
 /**
  * Function:

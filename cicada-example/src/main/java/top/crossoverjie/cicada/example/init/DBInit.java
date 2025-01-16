@@ -3,9 +3,9 @@ package top.crossoverjie.cicada.example.init;
 import lombok.extern.slf4j.Slf4j;
 import top.crossoverjie.cicada.db.pool.config.PoolConfigFactory;
 import top.crossoverjie.cicada.db.session.SqlSession;
-import top.crossoverjie.cicada.server.bootstrap.InitializeHandle;
-import top.crossoverjie.cicada.server.configuration.ApplicationConfiguration;
-import top.crossoverjie.cicada.server.configuration.ConfigurationHolder;
+import top.crossoverjie.cicada.server.lifecycle.InitializeHandle;
+import top.crossoverjie.cicada.server.config.configuration.ApplicationConfiguration;
+import top.crossoverjie.cicada.server.config.holder.ConfigurationHolder;
 
 /**
  * Function:
@@ -18,12 +18,27 @@ import top.crossoverjie.cicada.server.configuration.ConfigurationHolder;
 public class DBInit extends InitializeHandle {
 
     @Override
+    public int getOrder() {
+        return 1; // 数据库优先初始化
+    }
+    
+    @Override
+    public String getName() {
+        return "DatabaseInitializer";
+    }
+    
+    @Override
     public void handle() throws Exception {
-        ApplicationConfiguration configuration = (ApplicationConfiguration) ConfigurationHolder.getConfiguration(ApplicationConfiguration.class);
-        String username = configuration.get("db.username");
-        String pwd = configuration.get("db.pwd");
-        String url = configuration.get("db.url");
-        SqlSession.init(username, pwd, url,PoolConfigFactory.getPoolConfig());
-        log.info("db init success!!");
+        ApplicationConfiguration config = 
+            (ApplicationConfiguration) ConfigurationHolder.getConfiguration(ApplicationConfiguration.class);
+            
+        SqlSession.init(
+            config.get("db.username"),
+            config.get("db.pwd"),
+            config.get("db.url"),
+            PoolConfigFactory.getPoolConfig()
+        );
+        
+        log.info("Database initialization completed");
     }
 }

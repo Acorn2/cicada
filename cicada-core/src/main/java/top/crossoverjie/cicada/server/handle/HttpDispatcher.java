@@ -1,5 +1,6 @@
 package top.crossoverjie.cicada.server.handle;
 
+import com.alibaba.fastjson.JSON;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
@@ -7,24 +8,25 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.codec.http.*;
 import io.netty.handler.codec.http.cookie.Cookie;
+import io.netty.util.CharsetUtil;
 import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
 import top.crossoverjie.cicada.server.action.param.Param;
 import top.crossoverjie.cicada.server.action.param.ParamMap;
 import top.crossoverjie.cicada.server.action.req.CicadaHttpRequest;
 import top.crossoverjie.cicada.server.action.req.CicadaRequest;
+import top.crossoverjie.cicada.server.action.res.ApiResponse;
 import top.crossoverjie.cicada.server.action.res.CicadaHttpResponse;
 import top.crossoverjie.cicada.server.action.res.CicadaResponse;
-import top.crossoverjie.cicada.server.action.res.WorkRes;
 import top.crossoverjie.cicada.server.bean.CicadaBeanManager;
 import top.crossoverjie.cicada.server.config.AppConfig;
 import top.crossoverjie.cicada.server.constant.CicadaConstant;
 import top.crossoverjie.cicada.server.context.CicadaContext;
-import top.crossoverjie.cicada.server.exception.CicadaException;
-import top.crossoverjie.cicada.server.exception.GlobalHandelException;
-import top.crossoverjie.cicada.server.intercept.InterceptProcess;
-import top.crossoverjie.cicada.server.route.RouteProcess;
-import top.crossoverjie.cicada.server.route.RouterScanner;
+import top.crossoverjie.cicada.base.exception.CicadaException;
+import top.crossoverjie.cicada.server.exception.handle.GlobalHandelException;
+import top.crossoverjie.cicada.server.intercept.InterceptorChainManager;
+import top.crossoverjie.cicada.server.route.MethodInvokeProcessor;
+import top.crossoverjie.cicada.server.scanner.RouteAnnotationScanner;
 
 import java.lang.reflect.Method;
 import java.net.URLDecoder;
@@ -51,7 +53,7 @@ import java.util.Map;
  * 通过@ChannelHandler.Sharable注解实现
  */
 @ChannelHandler.Sharable
-public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHttpRequest> {
+public final class HttpDispatcher extends SimpleChannelInboundHandler<HttpRequest> {
 
     private static final Logger LOGGER = LoggerBuilder.getLogger(HttpDispatcher.class);
 
@@ -61,16 +63,32 @@ public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHtt
      * 确保线程安全
      */
     private final AppConfig appConfig = AppConfig.getInstance();
-    private final InterceptProcess interceptProcess = InterceptProcess.getInstance();
-    private final RouterScanner routerScanner = RouterScanner.getInstance();
-    private final RouteProcess routeProcess = RouteProcess.getInstance();
+    private final InterceptorChainManager interceptProcess = InterceptorChainManager.getInstance();
+    private final RouteAnnotationScanner routerScanner = RouteAnnotationScanner.getInstance();
+    private final MethodInvokeProcessor methodInvokeProcessor = MethodInvokeProcessor.getInstance();
     private final CicadaBeanManager cicadaBeanManager = CicadaBeanManager.getInstance();
     private final GlobalHandelException exceptionHandle = cicadaBeanManager.exceptionHandle();
     private Exception exception;
 
     @Override
-    public void channelRead0(ChannelHandlerContext ctx, DefaultHttpRequest httpRequest) {
-        CicadaRequest cicadaRequest = CicadaHttpRequest.init(httpRequest);
+    public void channelRead0(ChannelHandlerContext ctx, HttpRequest httpRequest) {
+
+        LOGGER.info("Received request: {} {}", httpRequest.method(), httpRequest.uri());
+
+        CicadaRequest cicadaRequest = null;
+        if (httpRequest instanceof DefaultHttpRequest) {
+            DefaultHttpRequest defaultHttpRequest = (DefaultHttpRequest) httpRequest;
+            LOGGER.info("HttpDispatcher channelRead0 error, request is not FullHttpRequest");
+            cicadaRequest = CicadaHttpRequest.init(defaultHttpRequest, null);
+        } else if (httpRequest instanceof FullHttpRequest) {
+            LOGGER.info("HttpDispatcher channelRead0 error, request is FullHttpRequest");
+            FullHttpRequest fullRequest = (FullHttpRequest) httpRequest;
+            // 从 FullHttpRequest 中获取请求体内容
+            String content = fullRequest.content().toString(CharsetUtil.UTF_8);
+
+            cicadaRequest = CicadaHttpRequest.init(fullRequest, content);
+        }
+
         CicadaResponse cicadaResponse = CicadaHttpResponse.init();
 
         // set current thread request and response
@@ -113,8 +131,9 @@ public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHtt
              * 6. 处理返回值
              */
             Method method = routerScanner.routeMethod(queryStringDecoder);
-            Object result = routeProcess.invoke(method, queryStringDecoder);
+            Object result = methodInvokeProcessor.invoke(method);
 
+            LOGGER.info("Method invoke result : {}", JSON.toJSONString(result));
             handleMethodResult(result);
 
             //WorkAction action = (WorkAction) actionClazz.newInstance();
@@ -145,27 +164,23 @@ public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHtt
             return;
         }
 
-        // 如果响应内容已经设置，则不处理返回值
-        if (CicadaContext.getResponse().getHttpContent() != null) {
-            return;
-        }
-
-        if (result instanceof WorkRes) {
-            // 如果返回值已经是WorkRes类型，直接转JSON
-            CicadaContext.getContext().json((WorkRes)result);
+        if (result instanceof ApiResponse) {
+            // 如果返回值已经是ApiResponse类型，直接转JSON
+            CicadaContext.getContext().json((ApiResponse) result);
         } else if (result instanceof String) {
             // 字符串类型，默认作为text处理
-            CicadaContext.getContext().text((String)result);
+            CicadaContext.getContext().text((String) result);
         } else {
-            // 其他类型返回值，包装成WorkRes后转JSON
-            WorkRes workRes = new WorkRes();
-            workRes.setDataBody(result);
-            CicadaContext.getContext().json(workRes);
+            // 其他类型返回值，包装成ApiResponse后转JSON
+            ApiResponse ApiResponse = new ApiResponse();
+            ApiResponse.setData(result);
+            CicadaContext.getContext().json(ApiResponse);
         }
     }
 
     /**
      * Response
+     *
      * @param ctx ChannelHandlerContext
      */
     private void responseContent(ChannelHandlerContext ctx) {
@@ -175,12 +190,12 @@ public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHtt
 
         // 2. 将字符串内容转换为ByteBuf
         ByteBuf buf = Unpooled.wrappedBuffer(context.getBytes(StandardCharsets.UTF_8));
-        
+
         // 3. 创建HTTP响应对象
         DefaultFullHttpResponse response = new DefaultFullHttpResponse(
-            HttpVersion.HTTP_1_1,    // HTTP版本
-            HttpResponseStatus.OK,    // 状态码
-            buf                      // 响应内容
+                HttpVersion.HTTP_1_1,    // HTTP版本
+                HttpResponseStatus.OK,    // 状态码
+                buf                      // 响应内容
         );
 
         // 4. 构建响应头
@@ -210,13 +225,17 @@ public final class HttpDispatcher extends SimpleChannelInboundHandler<DefaultHtt
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        exception = (Exception) cause;
         if (CicadaException.isResetByPeer(cause.getMessage())) {
             return;
         }
-
-        if (exceptionHandle != null) {
-            exceptionHandle.resolveException(CicadaContext.getContext(), exception);
+        
+        try {
+            cicadaBeanManager.exceptionHandle().resolveException(
+                CicadaContext.getContext(), 
+                (Exception) cause
+            );
+        } catch (Exception e) {
+            LOGGER.error("Error handling exception", e);
         }
     }
 

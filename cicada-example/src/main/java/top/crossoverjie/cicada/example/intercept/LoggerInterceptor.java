@@ -3,9 +3,9 @@ package top.crossoverjie.cicada.example.intercept;
 import org.slf4j.Logger;
 import top.crossoverjie.cicada.base.log.LoggerBuilder;
 import top.crossoverjie.cicada.server.action.param.Param;
-import top.crossoverjie.cicada.server.annotation.Interceptor;
+import top.crossoverjie.cicada.base.annotation.CicadaInterceptor;
 import top.crossoverjie.cicada.server.context.CicadaContext;
-import top.crossoverjie.cicada.server.intercept.CicadaInterceptor;
+import top.crossoverjie.cicada.server.intercept.AbstractInterceptor;
 
 /**
  * Function: common interceptor
@@ -14,8 +14,8 @@ import top.crossoverjie.cicada.server.intercept.CicadaInterceptor;
  *         Date: 2018/9/2 14:39
  * @since JDK 1.8
  */
-@Interceptor(order = 1)
-public class LoggerInterceptor extends CicadaInterceptor {
+@CicadaInterceptor(order = 1)
+public class LoggerInterceptor extends AbstractInterceptor {
 
     private static final Logger LOGGER = LoggerBuilder.getLogger(LoggerInterceptor.class) ;
 

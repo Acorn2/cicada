@@ -91,25 +91,25 @@ public class RouteAction {
     public void getUser(DemoReq req){
 
         LOGGER.info(req.toString());
-        WorkRes<DemoReq> reqWorkRes = new WorkRes<>() ;
-        reqWorkRes.setMessage("hello =" + req.getName());
-        CicadaContext.getContext().json(reqWorkRes) ;
+        ApiResponse<DemoReq> reqApiResponse = new ApiResponse<>() ;
+        reqApiResponse.setMessage("hello =" + req.getName());
+        CicadaContext.getContext().json(reqApiResponse) ;
     }
 
     @CicadaRoute("getInfo")
     public void getInfo(DemoReq req){
 
-        WorkRes<DemoReq> reqWorkRes = new WorkRes<>() ;
-        reqWorkRes.setMessage("getInfo =" + req.toString());
-        CicadaContext.getContext().json(reqWorkRes) ;
+        ApiResponse<DemoReq> reqApiResponse = new ApiResponse<>() ;
+        reqApiResponse.setMessage("getInfo =" + req.toString());
+        CicadaContext.getContext().json(reqApiResponse) ;
     }
 
     @CicadaRoute("getReq")
     public void getReq(CicadaContext context,DemoReq req){
 
-        WorkRes<DemoReq> reqWorkRes = new WorkRes<>() ;
-        reqWorkRes.setMessage("getReq =" + req.toString());
-        context.json(reqWorkRes) ;
+        ApiResponse<DemoReq> reqApiResponse = new ApiResponse<>() ;
+        reqApiResponse.setMessage("getReq =" + req.toString());
+        context.json(reqApiResponse) ;
     }
 
 
@@ -139,9 +139,9 @@ public class RouteAction {
     public void getUser(DemoReq req){
 
         LOGGER.info(req.toString());
-        WorkRes<DemoReq> reqWorkRes = new WorkRes<>() ;
-        reqWorkRes.setMessage("hello =" + req.getName());
-        CicadaContext.getContext().json(reqWorkRes) ;
+        ApiResponse<DemoReq> reqApiResponse = new ApiResponse<>() ;
+        reqApiResponse.setMessage("hello =" + req.getName());
+        CicadaContext.getContext().json(reqApiResponse) ;
     }
     
     @CicadaRoute("hello")
@@ -183,7 +183,7 @@ By default, the configuration file under the `classpath` is read.
 
 You can also customize the configuration file.
 
-Just need to extends `top.crossoverjie.cicada.server.configuration.AbstractCicadaConfiguration`
+Just need to extends `top.crossoverjie.cicada.base.configuration.AbstractCicadaConfiguration`
 class.
 
 Write the name of the configuration file at the same time.
@@ -281,10 +281,10 @@ public class ExceptionHandle implements GlobalHandelException {
     @Override
     public void resolveException(CicadaContext context, Exception e) {
         LOGGER.error("Exception", e);
-        WorkRes workRes = new WorkRes();
-        workRes.setCode("500");
-        workRes.setMessage(e.getClass().getName());
-        context.json(workRes);
+        ApiResponse ApiResponse = new ApiResponse();
+        ApiResponse.setCode("500");
+        ApiResponse.setMessage(e.getClass().getName());
+        context.json(ApiResponse);
     }
 }
 ```
